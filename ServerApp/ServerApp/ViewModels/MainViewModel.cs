@@ -26,7 +26,7 @@ public partial class MainViewModel : ViewModelBase
     public string StartServerButtonText => IsServerRunning ? "Close" : "Open";
     public bool PortTextboxIsReadOnly => IsServerRunning;
     [ObservableProperty]
-    private string _errorMessage = string.Empty;
+    private string _consoleHistory = string.Empty;
 
 
     public MainViewModel()
@@ -35,30 +35,36 @@ public partial class MainViewModel : ViewModelBase
 
         _serverModel.OnMessageReceived += OnClientMessageReceived;
         _serverModel.OnErrorOccurred += OnServerErrorOccurred;
+        _serverModel.OnMessageLogged += OnServerMessageLogged;
     }
 
     private void OnServerErrorOccurred(string errorText)
     {
-        NewConsoleMessage(errorText);
+        NewConsoleMessage($"ERROR: {errorText}");
+    }
+
+    private void OnServerMessageLogged(string message)
+    {
+        NewConsoleMessage(message);
     }
 
     private void NewConsoleMessage(string message)
     {
-        if (ErrorMessage.Length > 10000)
+        if (ConsoleHistory.Length > 10000)
         {
-            int index = ErrorMessage.IndexOf('\n');
+            int index = ConsoleHistory.IndexOf('\n');
             if (index != -1)
             {
-                ErrorMessage = ErrorMessage.Substring(index + 1);
+                ConsoleHistory = ConsoleHistory.Substring(index + 1);
             }
         }
-        ErrorMessage = $"{ErrorMessage}\n{message}";
+        ConsoleHistory = $"{ConsoleHistory}\n{message}";
     }
 
     [RelayCommand]
     private void CleanErrorHistory()
     {
-        ErrorMessage = string.Empty;
+        ConsoleHistory = string.Empty;
     }
 
     private void LoadImagesForChanging()

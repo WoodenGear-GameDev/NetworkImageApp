@@ -166,7 +166,7 @@
 
             <TextBox Grid.Row="2"
                 Classes="console-box"
-                Text="{Binding ErrorMessage}"
+                Text="{Binding ConsoleHistory}"
 
                 Foreground="#ffc800"
                 Background="#154451"

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -12,9 +11,11 @@ namespace ServerApp.Models
     {
         public event Action<string>? OnMessageReceived;
         public event Action<string>? OnErrorOccurred;
+        public event Action<string>? OnMessageLogged;
 
         public bool IsRunning { get; private set; }
         private TcpListener? _tcpListener;
+        private TcpClient? _currentClient;
         private CancellationTokenSource? _cts;
 
         public string ServerIp { get; private set; } = string.Empty;
@@ -55,11 +56,11 @@ namespace ServerApp.Models
                 _tcpListener = new TcpListener(IPAddress.Any, port);
                 _tcpListener.Start();
 
-                _cts = new CancellationTokenSource();
-
-                _ = StartListening(_tcpListener, _cts.Token);
+                _ = StartListeningForClient(_tcpListener);
 
                 IsRunning = true;
+
+                OnMessageLogged?.Invoke($"Server started.");
             }
             catch (SocketException ex)
             {
@@ -81,6 +82,14 @@ namespace ServerApp.Models
             {
                 _cts?.Cancel();
                 _tcpListener?.Stop();
+                if(_currentClient != null)
+                {
+                    _currentClient.Close();
+                    _currentClient = null;
+
+                    OnMessageLogged?.Invoke($"The client disconnected.");
+                }
+                OnMessageLogged?.Invoke($"Server stopped.");
             }
             catch (Exception ex)
             {
@@ -92,21 +101,47 @@ namespace ServerApp.Models
             }
         }
 
-        public async Task StartListening(TcpListener tcpListener, CancellationToken cancellationToken)
+        public async Task StartListeningForClient(TcpListener tcpListener)
+        {
+            _cts = new CancellationTokenSource();
+            while (!_cts.IsCancellationRequested)
+            {
+                try
+                {
+                    _currentClient = await tcpListener.AcceptTcpClientAsync(_cts.Token);
+                    OnMessageLogged?.Invoke($"The client has connected.");
+                    await StartListeningClientSignals(_currentClient, _cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    OnErrorOccurred?.Invoke($"Client connection error: {ex.Message}");
+                }
+            }
+        }
+
+        public async Task StartListeningClientSignals(TcpClient client, CancellationToken cancellationToken)
         {
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
+                using (client)
+                using (NetworkStream stream = client.GetStream())
                 {
-                    TcpClient client = await tcpListener.AcceptTcpClientAsync(cancellationToken);
-
-                    using NetworkStream stream = client.GetStream();
-
-                    byte[] rawMessage = new byte[32];
-                    int byteAmount = await stream.ReadAsync(rawMessage, 0, rawMessage.Length);
-
-                    if (byteAmount > 0)
+                    while (!cancellationToken.IsCancellationRequested)
                     {
+                        byte[] rawMessage = new byte[32];
+                        int byteAmount = await stream.ReadAsync(rawMessage, 0, rawMessage.Length);
+
+                        if (byteAmount == 0)
+                        {
+                            OnMessageLogged?.Invoke($"The client disconnected.");
+                            _currentClient = null;
+                            break;
+                        }
+
                         string message = Encoding.UTF8.GetString(rawMessage, 0, byteAmount);
                         OnMessageReceived?.Invoke(message);
                     }
@@ -114,15 +149,15 @@ namespace ServerApp.Models
             }
             catch (OperationCanceledException)
             {
-                
+
             }
             catch (Exception ex)
             {
-                OnErrorOccurred?.Invoke($"Error in the server background thread: {ex.Message}");
-            }
-            finally
-            {
-                IsRunning = false;
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                OnErrorOccurred?.Invoke($"Client communication error: {ex.Message}");
             }
         }
     }
