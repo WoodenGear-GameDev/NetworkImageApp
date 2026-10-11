@@ -1,24 +1,25 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ServerApp.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
-
-using ServerApp.Models;
+using System.Threading.Tasks;
 
 namespace ServerApp.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private string imageDirectory = "Assets/ImagesForChanging";
+    private string imageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "ImagesForChanging");
     private readonly TcpServerModel _serverModel = new TcpServerModel();
 
     private List<string> _imagePaths = new();
     private int _currentImageIndex = 0;
-
-    [ObservableProperty] private string _currentImagePath = string.Empty;
+    [ObservableProperty] private IImage? _currentImage;
     [ObservableProperty] private string _serverIp = string.Empty;
 
     [ObservableProperty] private int _port = 7777;
@@ -55,7 +56,8 @@ public partial class MainViewModel : ViewModelBase
             _imagePaths = new List<string>(Directory.GetFiles(imageDirectory, "*.png"));
             if (_imagePaths.Count > 0)
             {
-                CurrentImagePath = _imagePaths[0];
+                string filePath = _imagePaths[0];
+                CurrentImage = new Bitmap(filePath);
             }
         }
     }
@@ -66,7 +68,8 @@ public partial class MainViewModel : ViewModelBase
 
         _currentImageIndex = (_currentImageIndex + 1) % _imagePaths.Count;
 
-        CurrentImagePath = _imagePaths[_currentImageIndex];
+        string filePath = _imagePaths[_currentImageIndex];
+        CurrentImage = new Bitmap(filePath);
     }
 
     [RelayCommand]

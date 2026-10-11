@@ -3,20 +3,70 @@
         xmlns:vm="using:ServerApp.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="600"
         x:Class="ServerApp.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="ServerApp">
+        Icon="/Assets/NetworkImageIcon.png"
+        Title="NetworkImage - ServerApp">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainViewModel />
-    </Design.DataContext>
+    <Border Background="#1a5f72">
+        <StackPanel Margin="20" Spacing="10">
+            <TextBlock FontFamily="Helvetica"
+                Text="Server"
+                HorizontalAlignment="Center"
+                FontSize="25" 
+                FontWeight="Bold"
+                Foreground="White"/>
 
-    <TextBox Text="{Binding Greeting}"
-             HorizontalAlignment="Center"
-             VerticalAlignment="Center" />
+            <Grid ColumnDefinitions="Auto, Auto" RowDefinitions="Auto, Auto, Auto" Margin="10">
+                <TextBlock Grid.Row="0" Grid.Column="0"
+                    FontFamily="Helvetica"
+                    Text="Local IP:"
+                    Margin="0, 0, 10, 10"
+                    HorizontalAlignment="Left"
+                    FontSize="20" 
+                    Foreground="White"/>
+
+                <TextBox Grid.Row="0" Grid.Column="1"
+                     FontFamily="Helvetica"
+                     Background="#154451"
+                     Text="{Binding ServerIp}"
+                     IsReadOnly="True"
+                     HorizontalAlignment="Left"
+                     Padding="10, 3, 10, 5"
+                     Margin="0, 0, 0, 10"
+                     FontSize="16" 
+                     Foreground="White"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0"
+                    FontFamily="Helvetica"
+                    Text="Port:"
+                    HorizontalAlignment="Left"
+                    FontSize="20" 
+                    Foreground="White"/>
+
+                <TextBox Grid.Row="1" Grid.Column="1"
+                     FontFamily="Helvetica"
+                     Background="#154451"
+                     Text="{Binding Port}"
+                     HorizontalAlignment="Left"
+                     Padding="10, 3, 10, 5"
+                     Margin="0, 0, 0, 10"
+                     FontSize="16" 
+                     Foreground="White"/>
+
+                <Button Grid.Row="2" Grid.Column="1"
+                     Content="Open"
+                     Background="#154451"
+                     Foreground="White"
+                     HorizontalAlignment="Center"
+                     Padding="15, 7, 15, 7"
+                     Command="{Binding StartServerCommand}" />
+            </Grid>
+
+            <Image Source="{Binding CurrentImage}" Width="300" Height="300" Margin="20"/>
+
+        </StackPanel>
+    </Border>
 
 </Window>

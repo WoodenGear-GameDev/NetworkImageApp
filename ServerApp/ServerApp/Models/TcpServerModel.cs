@@ -10,12 +10,18 @@ namespace ServerApp.Models
     {
         public event Action<string>? OnMessageReceived;
 
-        public async Task StartServer(int port)
+        public Task StartServer(int port)
         {
             TcpListener tcpListener = new TcpListener(IPAddress.Any, port);
 
             tcpListener.Start();
+            _ = StartListening(tcpListener);
 
+            return Task.CompletedTask;
+        }
+
+        public async Task StartListening(TcpListener tcpListener)
+        {
             while (true)
             {
                 TcpClient client = await tcpListener.AcceptTcpClientAsync();
