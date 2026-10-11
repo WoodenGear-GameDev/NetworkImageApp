@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Controller.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Controller.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Controller">
+
+        <Window.DataContext>
+            <vm:MainWindowViewModel/>
+        </Window.DataContext>
+
+        <StackPanel Margin="20" Spacing="15">
+    <TextBlock Text="Управление картинкой"
+               FontSize="22"
+               HorizontalAlignment="Center"/>
+
+    <TextBox x:Name="IpBox"
+            Watermark="Введите IP-адрес"
+            Text="{Binding IpText, UpdateSourceTrigger=PropertyChanged}"/>
+    <TextBox x:Name="PortBox"
+            Watermark="Введите порт"
+            Text="{Binding PortText, UpdateSourceTrigger=PropertyChanged}"/>
+    <TextBlock x:Name = "Status"
+               Text="{Binding Status}"
+               FontSize="18"
+               HorizontalAlignment="Center"
+               />
+    <Button x:Name="SendButton"
+            Content="Поменять картинку"
+            Width="200"
+            Height="50"
+            HorizontalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            IsEnabled="{Binding IsSendEnabled}"
+            Command="{Binding SendCommand}"/>
+   </StackPanel>
+</Window>
