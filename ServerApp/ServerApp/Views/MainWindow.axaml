@@ -1,73 +1,202 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:ServerApp.ViewModels"
+
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="600"
+
         x:Class="ServerApp.Views.MainWindow"
         x:DataType="vm:MainViewModel"
+
+        Width="600"
+        Height="600"
+        CanResize="False"
+
         Icon="/Assets/NetworkImageIcon.png"
         Title="NetworkImage - ServerApp">
 
-    <Border Background="#1a5f72">
-        <StackPanel Margin="20" Spacing="10">
-            <TextBlock FontFamily="Helvetica"
-                Text="Server"
-                HorizontalAlignment="Center"
-                FontSize="25" 
-                FontWeight="Bold"
-                Foreground="White"/>
+    <Window.Styles>
+        <Style Selector="TextBox.console-box">
+            <Setter Property="Background" Value="#154451"/>
+            <Setter Property="BorderBrush" Value="#051317"/>
+            <Setter Property="Foreground" Value="#ffc800"/>
+            <Setter Property="CaretBrush" Value="Transparent"/>
+        </Style>
 
-            <Grid ColumnDefinitions="Auto, Auto" RowDefinitions="Auto, Auto, Auto" Margin="10">
+        <Style Selector="TextBox.console-box:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#154451"/>
+            <Setter Property="BorderBrush" Value="#051317"/>
+        </Style>
+
+        <Style Selector="TextBox.console-box:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#154451"/>
+            <Setter Property="BorderBrush" Value="#051317"/>
+        </Style>
+
+
+        <Style Selector="TextBox.white_textbox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="Red"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+        <Style Selector="TextBox.white_textbox:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="Red"/>
+        </Style>
+
+        <Style Selector="TextBox.white_textbox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#a2a2a2"/>
+            <Setter Property="BorderBrush" Value="Yellow"/>
+        </Style>
+
+
+        <Style Selector="Button.image-only-button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <Style Selector="Button.image-only-button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style Selector="Button.image-only-button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+
+        <Style Selector="Button.black_button">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="BorderBrush" Value="Red"/>
+        </Style>
+
+        <Style Selector="Button.black_button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#efefef" />
+            <Setter Property="BorderBrush" Value="Red"/>
+        </Style>
+
+        <Style Selector="Button.black_button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="LightGray" />
+            <Setter Property="BorderBrush" Value="Yellow"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Background="#1a5f72">
+        <Grid RowDefinitions="Auto, Auto, *">
+            <Image Grid.Row="0"
+                Source="/Assets/diskette_part.png" 
+
+                Width="330" 
+                Height="180"
+                
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"/>
+
+            <Grid ColumnDefinitions="Auto, Auto" RowDefinitions="Auto, Auto, Auto" Margin="145, 20, 10, 10" Grid.Row="0">
                 <TextBlock Grid.Row="0" Grid.Column="0"
-                    FontFamily="Helvetica"
                     Text="Local IP:"
-                    Margin="0, 0, 10, 10"
-                    HorizontalAlignment="Left"
-                    FontSize="20" 
-                    Foreground="White"/>
+
+                    Foreground="Black"
+                    FontSize="16"
+                    FontFamily="Helvetica"
+                    
+                    Margin="0, 4, 5, 10"
+                    HorizontalAlignment="Left"/>
 
                 <TextBox Grid.Row="0" Grid.Column="1"
-                     FontFamily="Helvetica"
-                     Background="#154451"
-                     Text="{Binding ServerIp}"
-                     IsReadOnly="True"
-                     HorizontalAlignment="Left"
-                     Padding="10, 3, 10, 5"
-                     Margin="0, 0, 0, 10"
-                     FontSize="16" 
-                     Foreground="White"/>
+                    Text="{Binding ServerIp}"
+
+                    FontSize="16"
+                    FontFamily="Helvetica"
+                    
+                    Classes="white_textbox"
+                    IsReadOnly="True"
+                    Padding="10, 3, 10, 5"
+
+                    Margin="0, 0, 0, 10"
+                    HorizontalAlignment="Left"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0"
-                    FontFamily="Helvetica"
                     Text="Port:"
-                    HorizontalAlignment="Left"
-                    FontSize="20" 
-                    Foreground="White"/>
+
+                    Foreground="Black"
+                    FontSize="16" 
+                    FontFamily="Helvetica"
+                    
+                    Margin="0, 4, 0, 0"
+                    HorizontalAlignment="Left"/>
 
                 <TextBox Grid.Row="1" Grid.Column="1"
-                     FontFamily="Helvetica"
-                     Background="#154451"
-                     Text="{Binding Port}"
-                     IsReadOnly="{Binding PortTextboxIsReadOnly}"
-                     HorizontalAlignment="Left"
-                     Padding="10, 3, 10, 5"
-                     Margin="0, 0, 0, 10"
-                     FontSize="16" 
-                     Foreground="White"/>
+                    Text="{Binding Port}"
+
+                    FontSize="16"
+                    FontFamily="Helvetica"
+                    
+                    Classes="white_textbox"
+                    MaxLength="5"
+                    IsReadOnly="{Binding PortTextboxIsReadOnly}"
+                    Padding="10, 3, 10, 5"
+                    
+                    Margin="0, 0, 0, 10"
+                    HorizontalAlignment="Left"/>
 
                 <Button Grid.Row="2" Grid.Column="1"
-                     Content="{Binding StartServerButtonText}"
-                     Background="#154451"
-                     Foreground="White"
-                     HorizontalAlignment="Center"
-                     Padding="15, 7, 15, 7"
-                     Command="{Binding ToggleServerCommand}" />
+                    Content="{Binding StartServerButtonText}"
+                                         
+                    Classes="black_button"
+                    Padding="15, 7, 15, 7"
+                                         
+                    HorizontalAlignment="Center"
+                    
+                    Command="{Binding ToggleServerCommand}" />
             </Grid>
 
-            <Image Source="{Binding CurrentImage}" Width="300" Height="300" Margin="20"/>
+            <Image Grid.Row="1"
+                Source="{Binding CurrentImage}" 
 
-        </StackPanel>
+                Width="200" 
+                Height="200" 
+                   
+                Margin="20"/>
+
+            <TextBox Grid.Row="2"
+                Classes="console-box"
+                Text="{Binding ErrorMessage}"
+
+                Foreground="#ffc800"
+                Background="#154451"
+                FontSize="11"
+                FontFamily="Helvetica"
+                AcceptsReturn="True" 
+                TextWrapping="Wrap" 
+                    
+                CaretBrush="Transparent"
+                IsReadOnly="True"
+                VerticalContentAlignment="Bottom"
+                Padding="10, 3, 50, 5"
+
+                Margin="10, 10, 10, 10"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                TextChanged="ConsoleTextBox_TextChanged"/>
+
+            <Button Grid.Row="2"
+                Classes="image-only-button"
+                Width="20"
+                Height="20"
+                Command="{Binding CleanErrorHistoryCommand}"
+
+                Margin="20"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top">
+                <Image Source="/Assets/trash.png" 
+                       Stretch="Uniform"/>
+            </Button>
+        </Grid>
     </Border>
-
 </Window>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -10,6 +11,7 @@ namespace ServerApp.Models
     internal class TcpServerModel
     {
         public event Action<string>? OnMessageReceived;
+        public event Action<string>? OnErrorOccurred;
 
         public bool IsRunning { get; private set; }
         private TcpListener? _tcpListener;
@@ -24,16 +26,23 @@ namespace ServerApp.Models
 
         private string GetLocalIpAddress()
         {
-            string hostName = Dns.GetHostName();
-
-            var hostEntry = Dns.GetHostEntry(hostName);
-
-            foreach (var ip in hostEntry.AddressList)
+            try
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                string hostName = Dns.GetHostName();
+
+                var hostEntry = Dns.GetHostEntry(hostName);
+
+                foreach (var ip in hostEntry.AddressList)
                 {
-                    return ip.ToString();
+                    if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        return ip.ToString();
+                    }
                 }
+            }
+            catch (Exception)
+            {
+
             }
 
             return "127.0.0.1";
@@ -41,40 +50,79 @@ namespace ServerApp.Models
 
         public void StartServer(int port)
         {
-            _tcpListener = new TcpListener(IPAddress.Any, port);
-            _tcpListener.Start();
+            try
+            {
+                _tcpListener = new TcpListener(IPAddress.Any, port);
+                _tcpListener.Start();
 
-            _cts = new CancellationTokenSource();
+                _cts = new CancellationTokenSource();
 
-            _ = StartListening(_tcpListener, _cts.Token);
+                _ = StartListening(_tcpListener, _cts.Token);
 
-            IsRunning = true;
+                IsRunning = true;
+            }
+            catch (SocketException ex)
+            {
+                IsRunning = false;
+                _tcpListener?.Stop();
+
+                OnErrorOccurred?.Invoke($"Network error: port {port} is already in use or unavailable. ({ex.Message})");
+            }
+            catch (Exception ex)
+            {
+                IsRunning = false;
+                OnErrorOccurred?.Invoke($"Network error: Failed to start server: {ex.Message}");
+            }
         }
 
         public void StopServer()
         {
-            _cts?.Cancel();
-            _tcpListener?.Stop();
-
-            IsRunning = false;
+            try
+            {
+                _cts?.Cancel();
+                _tcpListener?.Stop();
+            }
+            catch (Exception ex)
+            {
+                OnErrorOccurred?.Invoke($"Network error: Failed to stop server: {ex.Message}");
+            }
+            finally
+            {
+                IsRunning = false;
+            }
         }
 
         public async Task StartListening(TcpListener tcpListener, CancellationToken cancellationToken)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                TcpClient client = await tcpListener.AcceptTcpClientAsync();
-
-                using NetworkStream stream = client.GetStream();
-
-                byte[] rawMessage = new byte[32];
-                int byteAmount = await stream.ReadAsync(rawMessage, 0, rawMessage.Length);
-
-                if (byteAmount > 0)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    string message = Encoding.UTF8.GetString(rawMessage, 0, byteAmount);
-                    OnMessageReceived?.Invoke(message);
+                    TcpClient client = await tcpListener.AcceptTcpClientAsync(cancellationToken);
+
+                    using NetworkStream stream = client.GetStream();
+
+                    byte[] rawMessage = new byte[32];
+                    int byteAmount = await stream.ReadAsync(rawMessage, 0, rawMessage.Length);
+
+                    if (byteAmount > 0)
+                    {
+                        string message = Encoding.UTF8.GetString(rawMessage, 0, byteAmount);
+                        OnMessageReceived?.Invoke(message);
+                    }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                
+            }
+            catch (Exception ex)
+            {
+                OnErrorOccurred?.Invoke($"Error in the server background thread: {ex.Message}");
+            }
+            finally
+            {
+                IsRunning = false;
             }
         }
     }

@@ -10,4 +10,12 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = new MainViewModel();
     }
+
+    private void ConsoleTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (sender is TextBox textBox)
+        {
+            textBox.CaretIndex = textBox.Text?.Length ?? 0;
+        }
+    }
 }

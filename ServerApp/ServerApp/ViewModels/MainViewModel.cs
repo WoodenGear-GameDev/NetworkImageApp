@@ -25,24 +25,63 @@ public partial class MainViewModel : ViewModelBase
 
     public string StartServerButtonText => IsServerRunning ? "Close" : "Open";
     public bool PortTextboxIsReadOnly => IsServerRunning;
+    [ObservableProperty]
+    private string _errorMessage = string.Empty;
+
 
     public MainViewModel()
     {
         LoadImagesForChanging();
 
         _serverModel.OnMessageReceived += OnClientMessageReceived;
+        _serverModel.OnErrorOccurred += OnServerErrorOccurred;
+    }
+
+    private void OnServerErrorOccurred(string errorText)
+    {
+        NewConsoleMessage(errorText);
+    }
+
+    private void NewConsoleMessage(string message)
+    {
+        if (ErrorMessage.Length > 10000)
+        {
+            int index = ErrorMessage.IndexOf('\n');
+            if (index != -1)
+            {
+                ErrorMessage = ErrorMessage.Substring(index + 1);
+            }
+        }
+        ErrorMessage = $"{ErrorMessage}\n{message}";
+    }
+
+    [RelayCommand]
+    private void CleanErrorHistory()
+    {
+        ErrorMessage = string.Empty;
     }
 
     private void LoadImagesForChanging()
     {
-        if (Directory.Exists(imageDirectory))
+        try
         {
-            _imagePaths = new List<string>(Directory.GetFiles(imageDirectory, "*.png"));
-            if (_imagePaths.Count > 0)
+            if (Directory.Exists(imageDirectory))
             {
-                string filePath = _imagePaths[0];
-                CurrentImage = new Bitmap(filePath);
+                _imagePaths = new List<string>(Directory.GetFiles(imageDirectory, "*.png"));
+                if (_imagePaths.Count > 0)
+                {
+                    string filePath = _imagePaths[0];
+                    CurrentImage = new Bitmap(filePath);
+                }
             }
+            else
+            {
+                NewConsoleMessage("Image assets folder not found!");
+            }
+        }
+        catch (Exception ex)
+        {
+            NewConsoleMessage($"Error loading images: {ex.Message}");
         }
     }
 
@@ -63,6 +102,7 @@ public partial class MainViewModel : ViewModelBase
         {
             if (!int.TryParse(Port, out int portNumber) || portNumber < 1 || portNumber > 65535)
             {
+                NewConsoleMessage("Invalid port! Enter a number between 1 and 65535.");
                 return;
             }
 
@@ -73,6 +113,11 @@ public partial class MainViewModel : ViewModelBase
             _serverModel.StopServer();
         }
 
+        UpdateUiProperties();
+    }
+
+    private void UpdateUiProperties()
+    {
         OnPropertyChanged(nameof(IsServerRunning));
         OnPropertyChanged(nameof(StartServerButtonText));
         OnPropertyChanged(nameof(PortTextboxIsReadOnly));
