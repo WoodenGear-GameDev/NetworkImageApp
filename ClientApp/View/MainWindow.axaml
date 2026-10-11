@@ -28,13 +28,28 @@
                FontSize="18"
                HorizontalAlignment="Center"
                />
-    <Button x:Name="SendButton"
-            Content="Поменять картинку"
-            Width="200"
-            Height="50"
-            HorizontalAlignment="Center"
-            HorizontalContentAlignment="Center"
-            IsEnabled="{Binding IsSendEnabled}"
-            Command="{Binding SendCommand}"/>
+    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+        <Button x:Name="ConnectButton"
+                Content="Подключиться"
+                Width="150"
+                Height="50"
+                HorizontalContentAlignment="Center"
+                IsEnabled="{Binding IsConnectEnabled}"
+                Command="{Binding ConnectCommand}"/>
+        <Button x:Name="SendButton"
+                Content="Отправить"
+                Width="150"
+                Height="50"
+                HorizontalContentAlignment="Center"
+                IsEnabled="{Binding IsSendEnabled}"
+                Command="{Binding SendCommand}"/>
+        <Button x:Name="DisconnectButton"
+                Content="Отключиться"
+                Width="150"
+                Height="50"
+                HorizontalContentAlignment="Center"
+                IsEnabled="{Binding IsDisconnectEnabled}"
+                Command="{Binding DisconnectCommand}"/>
+    </StackPanel>
    </StackPanel>
 </Window>
