@@ -49,6 +49,7 @@
                      FontFamily="Helvetica"
                      Background="#154451"
                      Text="{Binding Port}"
+                     IsReadOnly="{Binding PortTextboxIsReadOnly}"
                      HorizontalAlignment="Left"
                      Padding="10, 3, 10, 5"
                      Margin="0, 0, 0, 10"
@@ -56,12 +57,12 @@
                      Foreground="White"/>
 
                 <Button Grid.Row="2" Grid.Column="1"
-                     Content="Open"
+                     Content="{Binding StartServerButtonText}"
                      Background="#154451"
                      Foreground="White"
                      HorizontalAlignment="Center"
                      Padding="15, 7, 15, 7"
-                     Command="{Binding StartServerCommand}" />
+                     Command="{Binding ToggleServerCommand}" />
             </Grid>
 
             <Image Source="{Binding CurrentImage}" Width="300" Height="300" Margin="20"/>

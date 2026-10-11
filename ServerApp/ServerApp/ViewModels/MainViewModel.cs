@@ -6,47 +6,31 @@ using ServerApp.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace ServerApp.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private string imageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "ImagesForChanging");
     private readonly TcpServerModel _serverModel = new TcpServerModel();
 
+    private string imageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "ImagesForChanging");
     private List<string> _imagePaths = new();
     private int _currentImageIndex = 0;
     [ObservableProperty] private IImage? _currentImage;
-    [ObservableProperty] private string _serverIp = string.Empty;
 
-    [ObservableProperty] private int _port = 7777;
+    [ObservableProperty] private string _port = "7777";
+    public string ServerIp => _serverModel.ServerIp;
+    public bool IsServerRunning => _serverModel.IsRunning;
+
+    public string StartServerButtonText => IsServerRunning ? "Close" : "Open";
+    public bool PortTextboxIsReadOnly => IsServerRunning;
 
     public MainViewModel()
     {
         LoadImagesForChanging();
-        ServerIp = GetLocalIpAddress();
 
         _serverModel.OnMessageReceived += OnClientMessageReceived;
-    }
-
-    private string GetLocalIpAddress()
-    {
-        string hostName = Dns.GetHostName();
-
-        var hostEntry = Dns.GetHostEntry(hostName);
-
-        foreach (var ip in hostEntry.AddressList)
-        {
-            if (ip.AddressFamily == AddressFamily.InterNetwork)
-            {
-                return ip.ToString();
-            }
-        }
-
-        return "127.0.0.1";
     }
 
     private void LoadImagesForChanging()
@@ -73,8 +57,24 @@ public partial class MainViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task StartServerAsync()
+    private async Task ToggleServer()
     {
-        await _serverModel.StartServer(Port);
+        if (!IsServerRunning)
+        {
+            if (!int.TryParse(Port, out int portNumber) || portNumber < 1 || portNumber > 65535)
+            {
+                return;
+            }
+
+            _serverModel.StartServer(portNumber);
+        }
+        else
+        {
+            _serverModel.StopServer();
+        }
+
+        OnPropertyChanged(nameof(IsServerRunning));
+        OnPropertyChanged(nameof(StartServerButtonText));
+        OnPropertyChanged(nameof(PortTextboxIsReadOnly));
     }
 }
